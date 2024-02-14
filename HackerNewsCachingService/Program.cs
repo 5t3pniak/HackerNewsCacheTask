@@ -12,7 +12,7 @@ builder.Services.AddMemoryCache();
 
 builder.Services.Configure<CacheServerConfiguration>(
     builder.Configuration.GetSection(nameof(CacheServerConfiguration)));
-builder.Services.AddSingleton<HackerNewsClient>();
+builder.Services.AddTransient<HackerNewsClient>();
 builder.Services.AddSingleton<BestStoriesReadModel>();
     
 

@@ -33,7 +33,7 @@ public class BestStoriesReadModel
 
     private void EvictionCallback(object key, object? value, EvictionReason reason, object? state)
     {
-        if (reason == EvictionReason.Expired)
+        if (reason == EvictionReason.Expired && _expired.Contains((int)key) == false)
         {
             _expired.Add((int)key);
             _storyCache.Set(key, value, _cacheEntryOpt);
@@ -53,7 +53,7 @@ public class BestStoriesReadModel
         var added = newOrder.Except(_orderedBestStories).ToList();
         var removed = _orderedBestStories.Except(newOrder).ToArray();
         var toUpdate = _expired.Except(removed).ToList();
-
+        
         var syncStateTasks = new List<Task<List<(int, BestStory)>>>
         {
             added.Count > 0
@@ -74,7 +74,8 @@ public class BestStoriesReadModel
         {
             _storyCache.Set(id, el, _cacheEntryOpt);
         }
-
+        _orderedBestStories = newOrder;
+        
         foreach (var r in removed)
         {
             _storyCache.Remove(r);
@@ -86,6 +87,7 @@ public class BestStoriesReadModel
     {
         var takeMax = Math.Min(n, _orderedBestStories.Count);
         var bestStoriesSnapshot = _orderedBestStories.ToList();
+        
         for (int i = 0; i < takeMax; i++)
         {
             if (_storyCache.TryGetValue<BestStory>(bestStoriesSnapshot[i], out var value))
